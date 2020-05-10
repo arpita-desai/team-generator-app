@@ -2,35 +2,127 @@ const Employee = require("./lib/Employee");
 const Manager = require("./lib/Manager");
 const Engineer = require("./lib/Engineer");
 const Intern = require("./lib/Intern");
+const render = require("./lib/htmlRenderer");
 const inquirer = require("inquirer");
 const path = require("path");
 const fs = require("fs");
-
 const OUTPUT_DIR = path.resolve(__dirname, "output");
+//console.log(OUTPUT_DIR);
 const outputPath = path.join(OUTPUT_DIR, "team.html");
+//console.log(outputPath);
 
-const render = require("./lib/htmlRenderer");
 
 
-// Write code to use inquirer to gather information about the development team members,
-// and to create objects for each team member (using the correct classes as blueprints!)
+//created objects for each team members.
+const questions = [
+    {
+        type: "input",
+        message: "What is your Name?",
+        name: "name",
+    },
+    {
+        type: "input",
+        message: "What is your Email?",
+        name: "email",
+    },
+    {
+        type: "input",
+        message: "What is your ID?",
+        name: "id",
+    },
+    {
+        type: "list",
+        message: "What is your Role?",
+        name: "role",
+        choices: [
+            "Manager",
+            "Engineer",
+            "Intern"
+        ],
+    },
+];
 
-// After the user has input all employees desired, call the `render` function (required
-// above) and pass in an array containing all employee objects; the `render` function will
-// generate and return a block of HTML including templated divs for each employee!
+const managerQuestion = [
+    {
+        type: "input",
+        message: "Waht is your Office Number?",
+        name: "officeNumber"
+    },
+];
 
-// After you have your html, you're now ready to create an HTML file using the HTML
-// returned from the `render` function. Now write it to a file named `team.html` in the
-// `output` folder. You can use the variable `outputPath` above target this location.
-// Hint: you may need to check if the `output` folder exists and create it if it
-// does not.
+const enggQuestion = [
+    {
+        type: "input",
+        message: "What is your Github username?",
+        name: "github"
+    },
+];
 
-// HINT: each employee type (manager, engineer, or intern) has slightly different
-// information; write your code to ask different questions via inquirer depending on
-// employee type.
+const internQuestion = [
+    {
+        type: "input",
+        message: "What is your School Name?",
+        name: "school"
+    }
+];
 
-// HINT: make sure to build out your classes first! Remember that your Manager, Engineer,
-// and Intern classes should all extend from a class named Employee; see the directions
-// for further information. Be sure to test out each class and verify it generates an
-// object with the correct structure and methods. This structure will be crucial in order
-// for the provided `render` function to work! ```
+const repeat = [
+    {
+        type: "confirm",
+        message: "Want to add another team member?",
+        name: "addMoreMember"
+    },
+];
+
+let team = [];
+
+function generateTeam(){
+    inquirer.prompt(questions).then(queRes => {
+        if(queRes.role === "Manager"){
+            inquirer.prompt(managerQuestion).then(manRes => {
+                team.push(new Manager(queRes.name, queRes.email, queRes.id, manRes.officeNumber));
+                askAgain();
+            });
+        }else if(queRes.role === "Engineer"){
+            inquirer.prompt(enggQuestion).then(enggRes => {
+                team.push(new Engineer(queRes.name, queRes.email, queRes.id, enggRes.github));
+                askAgain();
+            })
+        }else if(queRes.role === "Intern"){
+            inquirer.prompt(internQuestion).then(internRes => {
+                team.push(new Engineer(queRes.name, queRes.email, queRes.id, internRes.school));
+                askAgain();
+            })
+        }
+    });
+};
+
+function askAgain(){
+    inquirer.prompt(repeat).then(ans => {
+        if(ans.addMoreMember){
+            generateTeam();
+        } else {
+            fs.writeFile(outputPath, render(team), err => {
+                if(err){
+                    throw err;
+                }
+                console.log("HTML generated successfully");
+            });
+        }        
+    });
+};
+
+
+generateTeam();
+
+
+
+
+
+
+
+
+
+
+
+
