@@ -3,9 +3,11 @@ const Manager = require("./lib/Manager");
 const Engineer = require("./lib/Engineer");
 const Intern = require("./lib/Intern");
 const render = require("./lib/htmlRenderer");
+
 const inquirer = require("inquirer");
 const path = require("path");
 const fs = require("fs");
+
 const OUTPUT_DIR = path.resolve(__dirname, "output");
 //console.log(OUTPUT_DIR);
 const outputPath = path.join(OUTPUT_DIR, "team.html");
@@ -45,7 +47,7 @@ const questions = [
 const managerQuestion = [
     {
         type: "input",
-        message: "Waht is your Office Number?",
+        message: "What is your Office Number?",
         name: "officeNumber"
     },
 ];
@@ -79,27 +81,32 @@ let team = [];
 function generateTeam(){
     inquirer.prompt(questions).then(queRes => {
         if(queRes.role === "Manager"){
+            
             inquirer.prompt(managerQuestion).then(manRes => {
+                console.log(manRes);
                 team.push(new Manager(queRes.name, queRes.email, queRes.id, manRes.officeNumber));
                 askAgain();
             });
         }else if(queRes.role === "Engineer"){
+            
             inquirer.prompt(enggQuestion).then(enggRes => {
+                console.log(enggRes);
                 team.push(new Engineer(queRes.name, queRes.email, queRes.id, enggRes.github));
                 askAgain();
             })
         }else if(queRes.role === "Intern"){
+            
             inquirer.prompt(internQuestion).then(internRes => {
-                team.push(new Engineer(queRes.name, queRes.email, queRes.id, internRes.school));
+                console.log(internRes);
+                team.push(new Intern(queRes.name, queRes.email, queRes.id, internRes.school));
                 askAgain();
             })
         }
     });
-};
 
 function askAgain(){
-    inquirer.prompt(repeat).then(ans => {
-        if(ans.addMoreMember){
+    inquirer.prompt(repeat).then(resp => {
+        if(resp.addMoreMember){
             generateTeam();
         } else {
             fs.writeFile(outputPath, render(team), err => {
@@ -111,7 +118,7 @@ function askAgain(){
         }        
     });
 };
-
+};
 
 generateTeam();
 
